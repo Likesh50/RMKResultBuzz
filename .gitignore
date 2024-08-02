@@ -1,0 +1,82 @@
+# Flutter/Dart specific files
+**/build/
+**/.dart_tool/
+**/.pub/
+**/.packages
+**/pubspec.lock
+**/flutter-*.png
+
+# Flutter module directories
+modules/
+
+# MacOS
+.DS_Store
+
+# Android
+android/.gradle/
+android/app/debug/
+android/app/profile/
+android/app/release/
+android/gradle/
+android/local.properties
+android/.idea/
+android/build/
+
+# iOS
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/.symlinks/
+ios/Pods/
+ios/Podfile.lock
+ios/Flutter/Flutter.podspec
+ios/Flutter/Flutter.framework
+ios/Runner/GeneratedPluginRegistrant.*
+ios/Runner/Assets.xcassets/*
+ios/Runner/Info.plist
+ios/Runner/GoogleService-Info.plist
+ios/Flutter/Generated.xcconfig
+ios/Flutter/App.framework
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Flutter/Flutter.podspec.json
+ios/Flutter/Flutter.podspec.lock
+ios/Flutter/Podfile.lock
+ios/Flutter/.symlinks/
+ios/.pods/
+ios/.flutter-plugins
+ios/.flutter-plugins-dependencies
+ios/.gitignore
+ios/Flutter/Flutter.podspec
+
+# Web
+web/assets/
+web/.dart_tool/
+web/.pub/
+web/.packages
+web/pubspec.lock
+
+# Other files
+*.log
+*.swp
+*.swo
+*.tmp
+*.bak
+*.class
+
+# IDE specific files
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# JetBrains IDEs
+*.idea/
+*.iml
+*.iws
+
+# VS Code
+.vscode/
+
+# Project files
+*.sublime-project
+*.sublime-workspace
