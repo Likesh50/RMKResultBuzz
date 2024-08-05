@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/widgets.dart';
 import 'package:telephony/telephony.dart';
 import 'dart:io';
 import 'package:excel/excel.dart';
@@ -31,13 +32,15 @@ class ResultBuzzApp extends StatelessWidget {
   }
 }
 
-class AssessmentDropdown extends StatefulWidget {
-  @override
-  _AssessmentDropdownState createState() => _AssessmentDropdownState();
-}
+class AssessmentDropdown extends StatelessWidget {
+  final String selectedAssessment;
+  final Function(String) onAssessmentSelected;
 
-class _AssessmentDropdownState extends State<AssessmentDropdown> {
-  String _selectedAssessment = 'Select assessment type';
+  AssessmentDropdown({
+    required this.selectedAssessment,
+    required this.onAssessmentSelected,
+  });
+
   final List<String> _assessments = [
     'Select assessment type',
     'Unit Test-1',
@@ -50,26 +53,16 @@ class _AssessmentDropdownState extends State<AssessmentDropdown> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(15),
-      ),
       padding: EdgeInsets.all(16),
       width: double.infinity,
       child: DropdownButton<String>(
-        value: _selectedAssessment,
-        icon: Icon(Icons.arrow_downward, color: Colors.white),
-        iconSize: 24,
+        value: selectedAssessment,
+        icon: Container(),
         elevation: 16,
         style: TextStyle(color: Colors.white),
-        underline: Container(
-          height: 2,
-          color: Colors.white,
-        ),
+        dropdownColor: Color(0xFF164863), // Set dropdown background color
         onChanged: (String? newValue) {
-          setState(() {
-            _selectedAssessment = newValue!;
-          });
+          onAssessmentSelected(newValue!);
         },
         items: _assessments.map<DropdownMenuItem<String>>((String value) {
           return DropdownMenuItem<String>(
@@ -82,53 +75,43 @@ class _AssessmentDropdownState extends State<AssessmentDropdown> {
   }
 }
 
-class DepartmentDropdown extends StatefulWidget {
-  @override
-  _DepartmentDropdownState createState() => _DepartmentDropdownState();
-}
+class DepartmentDropdown extends StatelessWidget {
+  final String selectedDepartment;
+  final Function(String) onDepartmentSelected;
 
-class _DepartmentDropdownState extends State<DepartmentDropdown> {
-  String _selectedDepartment = 'Select department';
+  DepartmentDropdown({
+    required this.selectedDepartment,
+    required this.onDepartmentSelected,
+  });
+
   final List<String> _departments = [
     'Select department',
-    'Artificial Intelligence and Data Science',
-    'Civil Engineering',
-    'Computer Science and Business Systems',
-    'Computer Science and Design',
-    'Computer Science and Engineering',
-    'Electrical and Electronics Engineering',
-    'Electronics and Communication Engineering',
-    'Electronics and Communication (Advanced Communication Technology)',
-    'Electronics Engineering (VLSI Design and Technology)',
-    'Electronics and Instrumentation Engineering',
-    'Information Technology',
-    'Mechanical Engineering',
-    'Science and Humanities',
+    'AIDS',
+    'Civil',
+    'CSBS',
+    'CSD',
+    'CSE',
+    'EEE',
+    'ECE',
+    'EIE',
+    'IT',
+    'MECH',
+    'S&H',
   ];
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(15),
-      ),
       padding: EdgeInsets.all(16),
       width: double.infinity,
       child: DropdownButton<String>(
-        value: _selectedDepartment,
-        icon: Icon(Icons.arrow_downward, color: Colors.white),
-        iconSize: 24,
+        value: selectedDepartment,
+        icon: Container(),
         elevation: 16,
         style: TextStyle(color: Colors.white),
-        underline: Container(
-          height: 2,
-          color: Colors.white,
-        ),
+        dropdownColor: Color(0xFF164863), // Set dropdown background color
         onChanged: (String? newValue) {
-          setState(() {
-            _selectedDepartment = newValue!;
-          });
+          onDepartmentSelected(newValue!);
         },
         items: _departments.map<DropdownMenuItem<String>>((String value) {
           return DropdownMenuItem<String>(
@@ -148,6 +131,8 @@ class ResultBuzzPage extends StatefulWidget {
 
 class _ResultBuzzPageState extends State<ResultBuzzPage> {
   String? filePath;
+  String _selectedAssessment = 'Select assessment type';
+  String _selectedDepartment = 'Select department';
   int noOfEntries = 0;
   int validContacts = 0;
   int totalbatch = 0;
@@ -230,7 +215,7 @@ class _ResultBuzzPageState extends State<ResultBuzzPage> {
       setState(() {
         phoneMessages = tempPhoneMessages;
         totalBatches =
-            (phoneMessages.length / 5).ceil(); // Calculate total batches
+            (phoneMessages.length / 1).ceil(); // Calculate total batches
         currentBatch = 0;
         noOfEntries = phoneMessages.length;
         validContacts = phoneMessages.length - InvalidNos.length;
@@ -252,7 +237,7 @@ class _ResultBuzzPageState extends State<ResultBuzzPage> {
 
   // Function to send SMS in batches
   Future<void> sendMessagesInBatches() async {
-    const batchSize = 5;
+    const batchSize = 1;
     const delay = Duration(seconds: 10);
 
     setState(() {
@@ -270,14 +255,20 @@ class _ResultBuzzPageState extends State<ResultBuzzPage> {
       for (var item in batch) {
         final phone = item['phone'];
         final message = item['message'];
-        final finalmessage = "RMKEC RESULT";
+        final finalmessage = [
+          "RMKEC RESULT",
+          "Department Of $_selectedDepartment",
+          "$_selectedAssessment",
+          message
+        ].join('\n');
+
         if (phone != null && message != null) {
           print('Sending SMS to $phone with message: $message');
 
           try {
             await telephony.sendSms(
               to: phone,
-              message: message,
+              message: finalmessage,
             );
             print('SMS sent to $phone');
           } catch (e) {
@@ -285,12 +276,10 @@ class _ResultBuzzPageState extends State<ResultBuzzPage> {
           }
         }
       }
-
       setState(() {
         currentBatch++;
         batchstatus = currentBatch;
       });
-
       // Notify user about the batch sent
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Batch $currentBatch of $totalBatches sent.')),
@@ -381,7 +370,7 @@ class _ResultBuzzPageState extends State<ResultBuzzPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Image.asset(
-                'assets/images/logo.jpg',
+                'assets/images/logo.png',
                 height: 40,
               ),
               SizedBox(width: 10),
@@ -459,15 +448,41 @@ class _ResultBuzzPageState extends State<ResultBuzzPage> {
                       ],
                     ),
                   ),
-                  SizedBox(height: 20),
-                  DepartmentDropdown(),
-                  AssessmentDropdown(),
-                  SizedBox(height: 20),
+                  SizedBox(height: 10),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: Column(
+                      children: [
+                        AssessmentDropdown(
+                          selectedAssessment: _selectedAssessment,
+                          onAssessmentSelected: (String newValue) {
+                            setState(() {
+                              _selectedAssessment = newValue;
+                            });
+                          },
+                        ),
+                        DepartmentDropdown(
+                          selectedDepartment: _selectedDepartment,
+                          onDepartmentSelected: (String newValue) {
+                            setState(() {
+                              _selectedDepartment = newValue;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
                   GridView.count(
                     crossAxisCount: crossAxisCount,
                     shrinkWrap: true,
-                    crossAxisSpacing: 8,
-                    mainAxisSpacing: 8,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
                     children: [
                       InfoCard(
                         title: 'No of Entries',
@@ -477,14 +492,14 @@ class _ResultBuzzPageState extends State<ResultBuzzPage> {
                         title: 'Valid Contacts',
                         value: validContacts.toString(),
                       ),
-                      InfoCard(
-                        title: 'Total Batches',
-                        value: totalbatch.toString(),
-                      ),
-                      InfoCard(
-                        title: 'Batch Status',
-                        value: '$batchstatus/$totalbatch',
-                      ),
+                      // InfoCard(
+                      //   title: 'Total Batches',
+                      //   value: totalbatch.toString(),
+                      // ),
+                      // InfoCard(
+                      //   title: 'Batch Status',
+                      //   value: '$batchstatus/$totalbatch',
+                      // ),
                     ],
                   ),
                   SizedBox(height: 20),
@@ -501,7 +516,7 @@ class _ResultBuzzPageState extends State<ResultBuzzPage> {
                                 16), // Space between the progress indicator and the text
                         Text(
                           'Current Batch $currentBatch of $totalBatches',
-                          style: TextStyle(color: Colors.white),
+                          style: TextStyle(color: Colors.white, fontSize: 24),
                         ),
                       ],
                     ),
